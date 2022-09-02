@@ -1,57 +1,103 @@
-import { Play } from 'phosphor-react'
+import { HandPalm, Play } from 'phosphor-react'
+import { createContext, /* useEffect, */ useState } from 'react'
+
 import {
-  CountdownContainer,
-  Divider,
-  FormContainer,
   HomeContainer,
-  MinutesAmountInput,
   StartCountdownButton,
-  TaskInput,
+  StopCountdownButton,
 } from './styles'
+// import { NewCycleForm } from './components/NewCycleForm'
+import { Countdown } from './components/Countdown'
+interface Cycle {
+  id: string
+  task: string
+  minutesAmount: number
+  startDate: Date
+  interruptedDate?: Date
+  finishedDate?: Date
+}
+
+interface CyclesContextType {
+  activeCycle: Cycle | undefined
+  activeCycleId: string | null
+  markCurrentCycleAsFinished: () => void
+}
+
+export const CyclesContext = createContext({} as CyclesContextType)
 
 export function Home() {
+  const [cycles, setCycles] = useState<Cycle[]>([])
+  const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
+
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+  // function handleCreateNewCycle(data: NewCycleFormData) {
+  //   const newCycle: Cycle = {
+  //     id: String(new Date().getTime()),
+  //     task: data.task,
+  //     minutesAmount: data.minutesAmount,
+  //     startDate: new Date(),
+  //   }
+  //   setCycles((state) => [...state, newCycle])
+  //   setActiveCycleId(newCycle.id)
+  //   setAmountSecondsPassed(0)
+  //   reset()
+  // }
+
+  function markCurrentCycleAsFinished() {
+    setCycles((state) =>
+      state.map((cycle) => {
+        if (cycle.id === activeCycleId) {
+          return { ...cycle, interruptedDate: new Date() }
+        } else {
+          return cycle
+        }
+      }),
+    )
+  }
+
+  function handleInterruptCycle() {
+    setCycles((state) =>
+      state.map((cycle) => {
+        if (cycle.id === activeCycleId) {
+          return { ...cycle, interruptedDate: new Date() }
+        } else {
+          return cycle
+        }
+      }),
+    )
+    setActiveCycleId(null)
+  }
+
+  // const task = watch('task')
+  // const isSubmitDisabled = !task
+
   return (
     <HomeContainer>
-      <form action="">
-        <FormContainer>
-          <label htmlFor="task">Estou focado em</label>
-          <TaskInput
-            id="task"
-            list="task-suggestions"
-            placeholder="Dê um nome para a sua atividade"
-          />
-
-          <datalist id="task-suggestions">
-            <option value="Projeto 1" />
-            <option value="Projeto 2" />
-            <option value="Projeto 3" />
-            <option value="BALALA" />
-          </datalist>
-
-          <label htmlFor="minutesAmount">durante</label>
-          <MinutesAmountInput
-            type="number"
-            id="minutesAmount"
-            placeholder="00"
-            step={5}
-            min={5}
-            max={90}
-          />
-
-          <span>minutos.</span>
-        </FormContainer>
-        <CountdownContainer>
-          <span>0</span>
-          <span>0</span>
-          <Divider>:</Divider>
-          <span>0</span>
-          <span>0</span>
-        </CountdownContainer>
-
-        <StartCountdownButton type="submit">
-          <Play />
-          Começar
-        </StartCountdownButton>
+      <form /* onSubmit={handleSubmit(handleCreateNewCycle)} */ action="">
+        <CyclesContext.Provider
+          value={{ activeCycle, activeCycleId, markCurrentCycleAsFinished }}
+        >
+          {/* <NewCycleForm /> */}
+          <Countdown />
+        </CyclesContext.Provider>
+        {activeCycle ? (
+          <>
+            <StopCountdownButton onClick={handleInterruptCycle} type="button">
+              <HandPalm />
+              Interromper
+            </StopCountdownButton>
+          </>
+        ) : (
+          <>
+            <StartCountdownButton
+              /* disabled={isSubmitDisabled} */ type="submit"
+            >
+              <Play />
+              Começar
+            </StartCountdownButton>
+          </>
+        )}
       </form>
     </HomeContainer>
   )
