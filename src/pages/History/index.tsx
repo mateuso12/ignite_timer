@@ -6,6 +6,7 @@ import ptBR from 'date-fns/esm/locale/pt-BR/index.js'
 
 export function History() {
   const { cycles } = useContext(CyclesContext)
+  console.log('cycles: ', cycles)
 
   return (
     <HistoryContainer>
@@ -28,7 +29,7 @@ export function History() {
                   <td>{cycle.task}</td>
                   <td>{cycle.minutesAmount} minutos</td>
                   <td>
-                    {formatDistanceToNow(cycle.startDate, {
+                    {formatDistanceToNow(new Date(cycle.startDate), {
                       addSuffix: true,
                       locale: ptBR,
                     })}
